@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 #    Copyright (C) 2017 Andreas Fognini

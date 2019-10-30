@@ -346,7 +346,7 @@ class DacCom(object):
         """
         #Get page from address
         page = address>>8
-        address_without_page = address%0x100
+        address_without_page = address & 0xFF
 
         self.dac_change_page(page)
         self.dac_write_byte(address_without_page, data)
@@ -371,8 +371,12 @@ class DacCom(object):
     def dac_write_byte(self, address, data):
         """Write a byte to the DAC.
 
-            :param int address: Address of register with page prefix, e.g 0x0328 writes the register 0x28 of page multi-DUC1 and multi=DUC2 at the same time.
-            :param int data: data to write to register (0x00-0xFF)
+        :param int address: Address of register with page prefix, e.g 0x0328
+            writes the register 0x28 of page multi-DUC1 and
+            multi=DUC2 at the same time.
+
+        :param int data: data to write to register (0x00-0xFF)
+
         """
         self.gpio.set_direction(0xFF, 0xFF)
 
@@ -540,9 +544,6 @@ class DacCom(object):
         self.port_flush()
 
         while mask > 0:
-            self.set_bit_on_port(self.LMK_SCK, False)
-            self.port_flush()
-
             send_bit = (mask & send) > 0
             #Write data bit
             self.set_bit_on_port(self.LMK_SDIO, send_bit)
@@ -552,6 +553,12 @@ class DacCom(object):
             self.set_bit_on_port(self.LMK_SCK, True)
             self.port_flush()
             mask = mask >> 1
+
+            if mask > 0:
+                self.set_bit_on_port(self.LMK_SCK, False)
+                self.port_flush()
+
+
 
         self.gpio.set_direction(0xFF, 0b11011111)
         self.set_bit_on_port(self.LMK_SDIO, False) #Can't set a value which is on read mode
